@@ -4,6 +4,18 @@ from scrape_songs import write_to_csv  # Importing your module containing the me
 
 
 class TestWriteToCSV(unittest.TestCase):
+    def setUp(self):
+        # Create a test directory for outputs
+        self.output_directory = "test_outputs"
+        os.makedirs(self.output_directory, exist_ok=True)
+
+    def tearDown(self):
+        # Clean up the test directory for outputs
+        for filename in os.listdir(self.output_directory):
+            file_path = os.path.join(self.output_directory, filename)
+            os.remove(file_path)
+        os.rmdir(self.output_directory)
+
     def test_write_to_csv(self):
         # Sample songs data
         songs = [
@@ -40,10 +52,11 @@ class TestWriteToCSV(unittest.TestCase):
         ]
 
         # Create a temporary file path
-        temp_file_path = 'test_output.csv'
+        temp_file_name = 'test_output.csv'
+        temp_file_path = os.path.join(self.output_directory,'test_output.csv')
 
         # Call the method with the temporary file path
-        write_to_csv(songs, temp_file_path)
+        write_to_csv(songs, temp_file_name, output_dir=self.output_directory)
 
         # Check if the file was created and contains expected content
         self.assertTrue(os.path.exists(temp_file_path))

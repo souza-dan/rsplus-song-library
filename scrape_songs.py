@@ -1,4 +1,5 @@
 import csv
+import os
 from datetime import datetime
 
 from genres import get_genres
@@ -6,8 +7,8 @@ from songs import fetch_songs
 import logging
 
 
-def write_to_csv(songs, filename):
-    with (open(filename, mode='w', newline='', encoding='utf-8') as file):
+def write_to_csv(songs, filename, output_dir="outputs"):
+    with (open(os.path.join(output_dir, filename), mode='w', newline='', encoding='utf-8') as file):
         writer = csv.writer(file, delimiter=',', lineterminator='\n')
         writer.writerow([
             'Song ID',
