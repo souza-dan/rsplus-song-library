@@ -2,12 +2,18 @@ import json
 import logging
 import os
 import urllib
+from typing import List, Dict, Any
 
 import requests
 from random_sleep import random_sleep
 
 
-def fetch_songs(page, page_size, genre, cache_directory="requests"):
+def fetch_songs(
+    page: int,
+    page_size: int,
+    genre: str,
+    cache_directory: str = "requests"
+) -> List[Dict[str, Any]]:
     # Generate filename based on method arguments
     filename = f"genre_{genre}_page_{page}_page_size_{page_size}.json"
 
@@ -32,7 +38,7 @@ def fetch_songs(page, page_size, genre, cache_directory="requests"):
             with open(os.path.join(cache_directory, filename), 'w') as file:
                 json.dump(songs_data, file)
         else:
-            print("Failed to retrieve songs. Status code:", response.status_code)
+            logging.error("Failed to retrieve songs. Status code: %s", response.status_code)
             songs_data = []
 
         # Wait between 0-1 seconds to not send too many requests too quickly
