@@ -94,6 +94,45 @@ def write_to_csv(songs: List[Dict[str, Any]], filename: str, output_dir: str = "
             writer.writerow(extract_song_fields(song))
 
 
+def write_to_json_customforge_format(songs: List[Dict[str, Any]], filename: str, output_dir: str = "outputs") -> None:
+    """
+    Write songs to a JSON file in the CustomsForge Song Manager format.
+    """
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    grid = []
+    for idx, song in enumerate(songs):
+        grid.append({
+            "rowId": idx,
+            "colKey": f"{song.get('artistName','')[:3]}{song.get('songName','').replace(' ', '')[:25]}",  # Example key
+            "colRepairStatus": "Unknown",
+            "colEnabled": "Yes",
+            "colArtist": song.get("artistName", ""),
+            "colTitle": song.get("songName", ""),
+            "colDD": "",  # Not available in source
+            "colArrangements": ", ".join([
+                arr for arr, present in [
+                    ("Guitar", song.get("hasUGCGuitarArrangement") or song.get("hasOfficialGuitarArrangement")),
+                    ("Bass", song.get("hasUGCBassArrangement") or song.get("hasOfficialBassArrangement")),
+                    ("Piano", song.get("hasUGCPianoArrangement") or song.get("hasOfficialPianoArrangement"))
+                ] if present
+            ]),
+            "colTunings": "",  # Not available in source
+            "colTones": "",    # Not available in source
+            "colFilePath": "", # Not available in source
+            "colAppID": "",    # Not available in source
+            "colToolkitVersion": "", # Not available in source
+            "colPackageVersion": "", # Not available in source
+            "colPackageRating": 0,
+            "colTagged": "False",
+            "colArtistTitleAlbumDate": f"{song.get('artistName','')};{song.get('songName','')};{song.get('albumName','')};{song.get('songYear','')}"
+        })
+    output = {"dgvSongsMaster": grid}
+    with open(os.path.join(output_dir, filename), mode='w', encoding='utf-8') as f:
+        import json
+        json.dump(output, f, indent=2)
+
+
 def main() -> None:
     page_size = 25  # Max page size
 
@@ -117,6 +156,11 @@ def main() -> None:
 
     # Write songs to CSV
     write_to_csv(list(all_songs.values()), song_filename)
+    # Write songs to JSON master grid format from CustomsForge Song Manager
+    # Some streaming tools built for Rocksmith 2014 expect this format.
+    # https://github.com/LucidByteLabs/CustomsForge-Song-Manager
+    json_filename = f"SongsMasterGrid_{date_time_str}.json"
+    write_to_json_customforge_format(list(all_songs.values()), json_filename)
 
 
 if __name__ == "__main__":
